@@ -1,0 +1,40 @@
+THEORY Ex5Q2
+IMPORT-THEORY Equality
+IMPORT-THEORY Boolean
+IMPORT-THEORY Arithmetic
+IMPORT-THEORY List
+IMPORT-HASKELL List
+IMPORT-HASKELL Ex5
+
+THEOREM ex5q2
+
+   frec 512 == 262144
+
+STRATEGY ReduceLHS
+
+    frec 512 
+  = DEF frec
+    if 512 <= 8 then 8 else 512 * frec (512 `div` 8)
+  = SIMP
+    if False then 8 else 512 * frec 64
+  = IF 2
+    512 * frec 64
+  = DEF frec 
+    512 * (if 64 <= 8 then 8 else 64 * frec (64 `div` 8))
+  = SIMP 
+    512 * (if False then 8 else 64 * frec 8)
+  = IF 2
+    512 * (64 * frec 8)
+  = DEF frec 
+    512 * (64 * if 8 <= 8 then 8 else 8 * frec (8 `div` 8))
+  = SIMP
+    512 * (64 * if True then 8 else 8 * frec 1)
+  = IF 1
+    512 * (64 * 8)
+  = SIMP 
+    262144
+    
+END ReduceLHS
+
+QED ex5q2
+

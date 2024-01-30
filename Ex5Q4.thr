@@ -1,0 +1,247 @@
+THEORY Ex5Q4
+IMPORT-THEORY Equality
+IMPORT-THEORY Boolean
+IMPORT-THEORY Arithmetic
+IMPORT-THEORY List
+IMPORT-HASKELL List
+IMPORT-HASKELL Ex5
+
+THEOREM ex5q4
+
+   casef (x+1) > casef x
+
+STRATEGY CaseSplit Plus1Order
+  
+  CASE 1 (x < 2)
+    SHOW 
+      casef (x+1) > casef x
+
+    STRATEGY ReduceAll
+      casef (x+1) > casef x
+      = DEF casef @ casef 1 
+        ((case "guarded-if" of
+          _ | (x+1) < 3   ->  2*(x+1)
+            | (x+1) >= 3  -> 2*(x+1)-1) >
+        casef x)
+      = LAW lt_p1_to_m1 l2r @ <
+          ((case "guarded-if" of
+          _ | (x) < (3-1)   ->  2*(x+1)
+            | (x+1) >= 3  -> 2*(x+1)-1) >
+        casef x)
+      = SIMP 
+          ((case "guarded-if" of
+          _ | (x) < 2   ->  2*(x+1)
+            | (x+1) >= 3  -> 2*(x+1)-1) >
+        casef x)
+      = CASEP Plus1Order 1 @ guarded-if 1
+        ((case "guarded-if" of
+          _ | True  ->  2*(x+1)
+            | (x+1) >= 3  -> 2*(x+1)-1) >
+        casef x)
+      = GRDIF 1
+        2*(x+1) > casef x
+      = DEF casef
+        2*(x+1) > case "guarded-if" of
+          _ | x < 3   ->  2*x
+            | x >= 3  -> 2*x-1
+      = LAW lt_widen l2r @ guarded-if 1
+        2*(x+1) > case "guarded-if" of
+          _ |((x < 3) || x < (3-1))   ->  2*x
+            | x >= 3  -> 2*x-1
+      = SIMP
+          2*(x+1) > case "guarded-if" of
+          _ |((x < 3) || x < 2)   ->  2*x
+            | x >= 3  -> 2*x-1
+      = CASEP Plus1Order 1 @ < 2
+          2*(x+1) > case "guarded-if" of
+          _ |((x < 3) || True)  ->  2*x
+            | x >= 3  -> 2*x-1
+      = LAW or_right_zero l2r @ ||
+        2*(x+1) > case "guarded-if" of
+          _ |True  ->  2*x
+            | x >= 3  -> 2*x-1
+      = GRDIF 1
+        2*(x+1) > 2*x 
+      = LAW mul_add_left_distr l2r @ * 
+        2*x + 2*1 > 2*x
+      = SIMP
+        2*x + 2 > 2*x
+      = LAW nat_add_order_2
+        True
+    END ReduceAll
+  END CASE 1
+
+  CASE 2 (x == 2)
+    SHOW 
+      casef (x+1) > casef x
+    
+    STRATEGY ReduceAll
+      casef (x+1) > casef x
+      = CASEP Plus1Order 2 l2r @ x 1
+        casef (2+1) > casef x
+      = CASEP Plus1Order 2 l2r @ x 1
+        casef (2+1) > casef 2
+      = SIMP 
+        casef 3 > casef 2
+      = DEF casef
+        case "guarded-if" of
+          _ | 3 < 3   ->  2*3
+            | 3 >= 3  -> 2*3-1
+        > casef 2
+      = SIMP 
+        case "guarded-if" of
+          _ | False   ->  6
+            | True  -> 5
+        > casef 2
+      = GRDIF 2
+        5
+        > casef 2
+      = DEF casef 
+        5 >  case "guarded-if" of
+          _ | 2 < 3   ->  2*2
+            | 2 >= 3  -> 2*2-1
+      = SIMP
+        5 >  case "guarded-if" of
+          _ | True   ->  4
+            | False  -> 3
+      = GRDIF 1
+        5 > 4
+      = SIMP 
+        True
+    END ReduceAll
+  END CASE 2
+
+  CASE 3 (x == 3)
+
+    SHOW 
+      casef (x+1) > casef x
+  
+    STRATEGY ReduceAll
+      casef (x+1) > casef x
+      = CASEP Plus1Order 3 l2r @ x 
+        casef (3+1) > casef x
+      = CASEP Plus1Order 3 l2r @ x 
+        casef (3+1) > casef 3
+      = SIMP 
+         casef 4 > casef 3
+      = DEF casef
+        case "guarded-if" of
+          _ | 4 < 3   ->  2*4
+            | 4 >= 3  -> 2*4-1
+        > casef 3
+      = SIMP 
+        case "guarded-if" of
+          _ | False   ->  8
+            | True  -> 7
+        > casef 3
+      = GRDIF 2
+        7 > casef 3
+      = DEF casef 
+        7 > case "guarded-if" of
+          _ | 3 < 3   ->  2*3
+            | 3 >= 3  -> 2*3-1
+      = SIMP
+        7 > case "guarded-if" of
+          _ | False  ->  6
+            | True  -> 5
+      = GRDIF 2
+        7 > 5
+      = SIMP
+        True
+    END ReduceAll
+  END CASE 3
+
+  CASE 4 ( x > 3)
+    SHOW 
+      casef (x+1) > casef x
+
+    STRATEGY ReduceAll 
+      casef (x+1) > casef x
+      = DEF casef 
+        ((case "guarded-if" of
+          _ | (x+1) < 3   ->  2*(x+1)
+            | (x+1) >= 3  -> 2*(x+1)-1) 
+        >
+        casef x)
+      = LAW ge_widen l2r @ >=
+        ((case "guarded-if" of
+          _ | (x+1) < 3   ->  2*(x+1)
+            | (x+1) >= 3 ||(x+1)>= (3+1)  -> 2*(x+1)-1) 
+        >
+        casef x)
+      = LAW ge_plus_1 l2r @ >= 2
+        ((case "guarded-if" of
+          _ | (x+1) < 3   ->  2*(x+1)
+            | (x+1) >= 3 ||x>= 3  -> 2*(x+1)-1) 
+        >
+        casef x)
+      = LAW gt_def l2r @ >= 2 
+        ((case "guarded-if" of
+          _ | (x+1) < 3   ->  2*(x+1)
+            | (x+1) >= 3 ||((x> 3)|| x == 3)  -> 2*(x+1)-1) 
+        >
+        casef x)
+      = CASEP Plus1Order 4 @ >
+      ((case "guarded-if" of
+          _ | (x+1) < 3   ->  2*(x+1)
+            | (x+1) >= 3 ||(True || x == 3)  -> 2*(x+1)-1) 
+        >
+        casef x )
+      = LAW or_left_zero l2r @ || 2
+      ((case "guarded-if" of
+          _ | (x+1) < 3   ->  2*(x+1)
+            | (x+1) >= 3 || True   -> 2*(x+1)-1) 
+        >
+        casef x )
+      = LAW or_right_zero l2r @ || 
+          ((case "guarded-if" of
+          _ | (x+1) < 3   ->  2*(x+1)
+            | True   -> 2*(x+1)-1) 
+        >
+        casef x )
+      = GRDIF 2
+        2*(x+1)-1 > casef x
+      =  DEF casef
+        2*(x+1)-1 > (case "guarded-if" of
+          _ | x < 3   ->  2*x
+            | x >= 3  -> 2*x-1) 
+      = LAW gt_def l2r @ >=
+        2*(x+1)-1 > (case "guarded-if" of
+          _ | x < 3   ->  2*x
+            | (x > 3)||(x==3)  -> 2*x-1)
+      = CASEP Plus1Order 4 @ > 2
+        2*(x+1)-1 > (case "guarded-if" of
+          _ | x < 3   ->  2*x
+            | True||(x==3)  -> 2*x-1)
+      = LAW or_left_zero l2r @ ||
+              2*(x+1)-1 > (case "guarded-if" of
+          _ | x < 3   ->  2*x
+            | True  -> 2*x-1)
+      = GRDIF 2
+        2*(x+1)-1 > 2*x-1
+      = LAW gt_minus_1 l2r 
+        2*(x+1) > 2*x
+      = LAW mul_add_left_distr l2r @ * 
+        2*x + 2*1 > 2*x
+      = SIMP 
+        2*x + 2 > 2*x
+      = LAW nat_add_order_2 
+        True
+    END ReduceAll
+  END CASE 4
+END CaseSplit
+
+QED ex5q4
+
+CASE-SCHEME Plus1Order
+CASE 1  (x <  2)
+CASE 2  (x == 2)
+CASE 3  (x == 3)
+CASE 4  (x >  3)
+EXHAUSTIVE (x <  2) || (x == 2) || (x == 3) || (x >  3)
+EXCLUSIVE 1 2  not((x <  2) && (x == 2))
+EXCLUSIVE 1 3  not((x <  2) && (x == 3))
+EXCLUSIVE 1 4  not((x <  2) && (x >  3))
+EXCLUSIVE 2 3  not((x == 2) && (x == 3))
+EXCLUSIVE 2 4  not((x == 2) && (x >  3))
+EXCLUSIVE 3 4  not((x == 3) && (x >  3))
